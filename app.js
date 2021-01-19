@@ -1,8 +1,11 @@
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
+var fs = require('fs');
+const { Pool } = require('pg');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+require("dotenv").config();
 
 var indexRouter = require('./routes/index');
 var urlRouter = require('./routes/url');
@@ -37,5 +40,26 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+
+const pool = new Pool({
+  user: process.env.DB_user,
+  host: process.env.DB_host,
+  database: process.env.DB_database,
+  password: process.env.DB_password,
+  port: process.env.DB_port
+})
+
+fs.readFile(__dirname+"/script.sql", 'utf8', function(err, data) {
+  if (err) throw err;
+  pool.connect((err, client, done) => {
+      if (err) throw err
+      var query = data.trim();
+      client.query(query, (err, res) => {
+          done()
+          if (err) throw err
+      })
+  })
+});
+
 
 module.exports = app;

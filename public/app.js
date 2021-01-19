@@ -7,19 +7,48 @@ var utils = {
         });
     },
     overlay:{
-        on:function(text){
+        on:function(text, disapperInSeconds){
             document.getElementById("overlay").style.display = "block";
             if(text)
-            document.getElementById("overlay").innerText = text;
+            $("#overlay span").text(text);
+            if(disapperInSeconds)
+            setTimeout(utils.overlay.off, 1000* disapperInSeconds);
         },
         off:function(){
+            $("#overlay span").text("Please wait ...");
             document.getElementById("overlay").style.display = "none";
         }
+    },
+    getLongUrlFormat:function(input){
+        var maxLength = 20;
+        input = input || "";
+        if(input.length > maxLength){
+            return input.substr(0,maxLength-1)+"...";
+        }
+        return input;
+    },
+    copyToClipboard:function (text) {
+        var input = document.body.appendChild(document.createElement("input"));
+        input.value = text;
+        input.focus();
+        input.select();
+        document.execCommand('copy');
+        input.parentNode.removeChild(input);
     }
 }
 // end of utils
 
 function initlizeApp(){
+    
+    //url list
+    var urlList  =ko.observableArray([])
+    var vm = {urlList:urlList, formatLongUrl:function(input){return utils.getLongUrlFormat(input)}};
+    vm.copySUrl=function(data){
+        utils.copyToClipboard(data.s_url);
+        utils.overlay.on("copied successfully",1);
+    }
+    ko.applyBindings(vm);
+    
     
     // set/get local storage
     var userId = window.localStorage.getItem('user-id');
@@ -43,6 +72,7 @@ function initlizeApp(){
                 contentType: "application/json; charset=utf-8",
                 data : JSON.stringify(data),
                 success : function(result) {
+                    utils.overlay.on('Created successfully');
                     $("#txtLongUrl").val('')
                     loadData()
                 },
@@ -53,7 +83,7 @@ function initlizeApp(){
         }
     }
     function loadData(){
-        utils.overlay.on('Loading data');
+        utils.overlay.on('Loading data...');
         
         $.ajax({
             url:"/url?user-id="+userId,
@@ -61,28 +91,9 @@ function initlizeApp(){
             method : "GET",
             contentType: "application/json; charset=utf-8",
             success : function(result) {
-                var tbody="";
                 if(result && Array.isArray(result)){
-                    for (let index = 0; index < result.length; index++) {
-                        var element = result[index];
-                        tbody+="<tr>";
-                        
-                        tbody+="<td>";
-                        tbody+=(index+1);
-                        tbody+="</td>";
-                        
-                        tbody+="<td>";
-                        tbody+=element.l_url;
-                        tbody+="</td>";
-                        
-                        tbody+="<td><a target='_blank' href='"+ element.s_url +"'>";
-                        tbody+=element.s_url;
-                        tbody+="</a></td>";
-                        
-                        tbody+="</tr>";
-                    }
+                    urlList(result);
                 }
-                $("#tableMain #tbodyMain").html(tbody);
             },
             complete:function(){
                 utils.overlay.off();
@@ -90,8 +101,10 @@ function initlizeApp(){
         })
     }
     
+    
     utils.overlay.off();
     loadData();
+    
     
 }
 
