@@ -70,10 +70,10 @@ exports.getMyShortUrl = function(s_url, callBack) {
 };
 
 exports.makeShortUrl = function(baseUrl, body, callBack) {
-    if (!body.l_url || !isValidUuid4(body.l_url)) callBack({
+    if (!body.l_url) callBack({
         msg: 'invalid l_url'
     }, null);
-    else if (!body.usr) callBack({
+    else if (!body.usr || !isValidUuid4(body.usr)) callBack({
         msg: 'invalid usr'
     }, null);
     else {
