@@ -3,7 +3,7 @@ var utils = {
     getUuidv4: function() {
         return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
             var r = Math.random() * 16 | 0,
-                v = c == 'x' ? r : (r & 0x3 | 0x8);
+            v = c == 'x' ? r : (r & 0x3 | 0x8);
             return v.toString(16);
         });
     },
@@ -11,9 +11,9 @@ var utils = {
         on: function(text, disapperInSeconds) {
             document.getElementById("overlay").style.display = "block";
             if (text)
-                $("#overlay span").text(text);
+            $("#overlay span").text(text);
             if (disapperInSeconds)
-                setTimeout(utils.overlay.off, 1000 * disapperInSeconds);
+            setTimeout(utils.overlay.off, 1000 * disapperInSeconds);
         },
         off: function() {
             $("#overlay span").text("Please wait ...");
@@ -40,7 +40,7 @@ var utils = {
 // end of utils
 
 function initlizeApp() {
-
+    
     //url list
     var urlList = ko.observableArray([])
     var vm = {
@@ -54,8 +54,8 @@ function initlizeApp() {
         utils.overlay.on("copied successfully", 1);
     }
     ko.applyBindings(vm);
-
-
+    
+    
     // set/get local storage
     var userId = window.localStorage.getItem('user-id');
     if (!window.localStorage) alert('local storage not availeble')
@@ -63,9 +63,9 @@ function initlizeApp() {
         userId = utils.getUuidv4();
         localStorage.setItem('user-id', userId);
     }
-
+    
     //event listeners
-
+    
     window.submitForm = function() {
         utils.overlay.on();
         var l_url = $("#txtLongUrl").val();
@@ -91,10 +91,10 @@ function initlizeApp() {
             })
         }
     }
-
+    
     function loadData() {
         utils.overlay.on('Loading data...');
-
+        
         $.ajax({
             url: "/url?user-id=" + userId,
             dataType: "json",
@@ -110,12 +110,18 @@ function initlizeApp() {
             }
         })
     }
-
-
+    
+    
     utils.overlay.off();
     loadData();
-
-
+    
+    //pwa
+    navigator.serviceWorker &&
+    navigator.serviceWorker.register('SW.js').then(function (registration)
+    {
+    });
+    
+    
 }
 
 
